@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Exp Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #343a40;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .login-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      max-width: 400px;
+      margin: 3rem auto;
+    }
+    .login-box h2 {
+      margin-top: 0;
+      text-align: center;
+      color: #343a40;
+    }
+    .login-box input, .login-box button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+    .login-box button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .login-box button:hover {
+      background-color: #0056b3;
+    }
+    .container {
+      display: none;
+      max-width: 1200px;
+      margin: auto;
+      padding: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .sidebar {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-right: 1rem;
+    }
+    .sidebar button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 0.75rem;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sidebar button:hover {
+      background-color: #e2e6ea;
+    }
+    .content {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      min-width: 300px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid #dee2e6;
+      text-align: center;
+      word-break: break-word;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    tr:hover {
+      background-color: #f1f3f5;
+    }
+    .remove-btn, .edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #6c757d;
+      margin: 0 5px;
+    }
+    .remove-btn::before {
+      content: "🗑️";
+    }
+    .edit-btn::before {
+      content: "✏️";
+    }
+    .remove-btn:hover {
+      color: #dc3545;
+    }
+    .edit-btn:hover {
+      color: #17a2b8;
+    }
+    .right-panel {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-left: 1rem;
+      min-width: 200px;
+    }
+    .online {
+      color: green;
+      font-weight: bold;
+    }
+    .online::before {
+      content: "● ";
+      color: green;
+    }
+    .offline {
+      color: gray;
+    }
+    .offline::before {
+      content: "● ";
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+<header>
+  Stock Exp Control
+</header>
+<section class="login-box" id="loginSection">
+  <h2>Είσοδος</h2>
+  <input id="user" type="text" placeholder="Όνομα Χρήστη">
+  <input id="pass" type="password" placeholder="Κωδικός Πρόσβασης">
+  <button onclick="login()">Σύνδεση</button>
+</section>
+<div class="container" id="mainContainer" style="display:none;">
+  <div class="sidebar">
+    <button onclick="filterCategory('all')">Όλα</button>
+    <button onclick="filterCategory('food')">Food</button>
+    <button onclick="filterCategory('household')">Household</button>
+    <button onclick="filterCategory('pets')">Pets</button>
+  </div>
+  <div class="content">
+    <button id="logoutBtn" onclick="logout()">Αποσύνδεση</button>
+    <button id="exportBtn" onclick="exportToExcel()">Εξαγωγή σε Excel</button>
+    <button id="createUserBtn" onclick="createUser()">Δημιουργία Χρήστη</button>
+    <section class="product-box" id="productBox">
+      <h3>Προσθήκη Προϊόντος</h3>
+      <input id="pname" type="text" placeholder="Όνομα">
+      <input id="barcode" type="text" placeholder="Barcode">
+      <input id="scode" type="text" placeholder="Small Code">
+      <input id="qty" type="number" placeholder="Ποσότητα">
+      <input id="exp" type="date" placeholder="Ημ. Λήξης">
+      <select id="category">
+        <option value="food">Food</option>
+        <option value="household">Household</option>
+        <option value="pets">Pets</option>
+      </select>
+      <input id="comment" type="text" placeholder="Σχόλια">
+      <button onclick="addProduct()">Προσθήκη</button>
+    </section>
+    <section>
+      <h3>Λίστα Αποθεμάτων</h3>
+      <table id="productTable">
+        <thead>
+          <tr>
+            <th onclick="sortProducts('name')">Όνομα ▲</th>
+            <th>Barcode</th>
+            <th>Small Code</th>
+            <th onclick="sortProducts('exp')">Ημ. Λήξης ▲</th>
+            <th>Κατηγορία</th>
+            <th>Ποσότητα</th>
+            <th id="addedByHeader">Προστέθηκε από</th>
+            <th>Σχόλια</th>
+            <th>Ενέργειες</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
+  <div class="right-panel" id="userList"></div>
+</div>
+<script>
+  let users = JSON.parse(localStorage.getItem("users")) || { admin: "121720", user1: "0000" };
+  localStorage.setItem("users", JSON.stringify(users));
+  let currentCategory = 'all';
+  let currentUser = null;
+
+  function login() {
+    const username = document.getElementById("user").value;
+    const password = document.getElementById("pass").value;
+    const storedUsers = JSON.parse(localStorage.getItem("users"));
+    if (storedUsers[username] && storedUsers[username] === password) {
+      currentUser = username;
+      localStorage.setItem("onlineUser", username);
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("mainContainer").style.display = "flex";
+      updateStatus();
+      loadProducts();
+      if (currentUser !== "admin") {
+        document.getElementById("createUserBtn").style.display = "none";
+        document.getElementById("addedByHeader").style.display = "none";
+      }
+    } else {
+      alert("Λάθος όνομα χρήστη ή κωδικός!");
+    }
+  }
+  function logout() {
+    localStorage.removeItem("onlineUser");
+    location.reload();
+  }
+  function updateStatus() {
+    const userList = document.getElementById("userList");
+    const storedUsers = JSON.parse(localStorage.getItem("users"));
+    let html = '<h4>Κατάσταση Χρηστών</h4>';
+    for (const user in storedUsers) {
+      const isOnline = localStorage.getItem("onlineUser") === user;
+      html += `<div class="${isOnline ? 'online' : 'offline'}">${user}`;
+      if (currentUser === "admin" && user !== "admin") {
+        html += `<button class="edit-btn" onclick="editUser('${user}')"></button>
+                 <button class="remove-btn" onclick="deleteUser('${user}')"></button>`;
+      }
+      html += `</div>`;
+    }
+    userList.innerHTML = html;
+  }
+  function createUser() {
+    if (currentUser !== "admin") return;
+    const newUser = prompt("Όνομα νέου χρήστη:");
+    const newPass = prompt("Κωδικός νέου χρήστη:");
+    if (newUser && newPass) {
+      users[newUser] = newPass;
+      localStorage.setItem("users", JSON.stringify(users));
+      updateStatus();
+    }
+  }
+  function editUser(user) {
+    if (currentUser !== "admin") return;
+    const newUsername = prompt("Νέο όνομα χρήστη:", user);
+    const newPassword = prompt("Νέος κωδικός:", users[user]);
+    if (newUsername && newPassword) {
+      delete users[user];
+      users[newUsername] = newPassword;
+      localStorage.setItem("users", JSON.stringify(users));
+      updateStatus();
+    }
+  }
+  function deleteUser(user) {
+    if (currentUser !== "admin") return;
+    if (confirm(`Να διαγράψω τον χρήστη ${user};`)) {
+      delete users[user];
+      localStorage.setItem("users", JSON.stringify(users));
+      updateStatus();
+    }
+  }
+  function addProduct() {
+    const name = document.getElementById("pname").value;
+    const barcode = document.getElementById("barcode").value;
+    const scode = document.getElementById("scode").value;
+    const qty = document.getElementById("qty").value;
+    const exp = document.getElementById("exp").value;
+    const category = document.getElementById("category").value;
+    const comment = document.getElementById("comment").value;
+    const addedBy = currentUser || "unknown";
+    if (!name || !barcode || !qty || !exp) {
+      alert("Συμπλήρωσε όλα τα υποχρεωτικά πεδία!");
+      return;
+    }
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    products.push({ name, barcode, scode, qty, exp, category, comment, addedBy });
+    localStorage.setItem("products", JSON.stringify(products));
+    loadProducts();
+    document.getElementById("pname").value = "";
+    document.getElementById("barcode").value = "";
+    document.getElementById("scode").value = "";
+    document.getElementById("qty").value = "";
+    document.getElementById("exp").value = "";
+    document.getElementById("comment").value = "";
+  }
+  function filterCategory(cat) {
+    currentCategory = cat;
+    loadProducts();
+  }
+  function loadProducts() {
+    const table = document.getElementById("productTable").getElementsByTagName("tbody")[0];
+    table.innerHTML = "";
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    products.forEach((p, index) => {
+      if (currentCategory !== 'all' && p.category !== currentCategory) return;
+      const row = table.insertRow();
+      row.insertCell(0).innerText = p.name;
+      row.insertCell(1).innerText = p.barcode;
+      row.insertCell(2).innerText = p.scode;
+      row.insertCell(3).innerText = p.exp;
+      row.insertCell(4).innerText = p.category;
+      row.insertCell(5).innerText = p.qty;
+      if (currentUser === "admin") {
+        row.insertCell(6).innerText = p.addedBy;
+      } else {
+        row.insertCell(6).style.display = "none";
+      }
+      row.insertCell(7).innerText = p.comment;
+      const cell = row.insertCell(8);
+      if (currentUser === "admin") {
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit-btn";
+        editBtn.onclick = function () {
+          editProduct(index);
+        };
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.onclick = function () {
+          products.splice(index, 1);
+          localStorage.setItem("products", JSON.stringify(products));
+          loadProducts();
+        };
+        cell.appendChild(editBtn);
+        cell.appendChild(removeBtn);
+      } else {
+        cell.innerHTML = "-";
+      }
+    });
+  }
+  function editProduct(index) {
+    if (currentUser !== "admin") return;
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    const p = products[index];
+    const name = prompt("Όνομα:", p.name);
+    const barcode = prompt("Barcode:", p.barcode);
+    const scode = prompt("Small Code:", p.scode);
+    const qty = prompt("Ποσότητα:", p.qty);
+    const exp = prompt("Ημ. Λήξης:", p.exp);
+    const category = prompt("Κατηγορία:", p.category);
+    const comment = prompt("Σχόλια:", p.comment);
+    if (name && barcode && qty && exp) {
+      products[index] = { name, barcode, scode, qty, exp, category, comment, addedBy: p.addedBy };
+      localStorage.setItem("products", JSON.stringify(products));
+      loadProducts();
+    }
+  }
+  function exportToExcel() {
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    if (products.length === 0) {
+      alert("Δεν υπάρχουν προϊόντα για εξαγωγή.");
+      return;
+    }
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Όνομα,Barcode,Small Code,Ημ. Λήξης,Κατηγορία,Ποσότητα,Προστέθηκε από,Σχόλια\n";
+    products.forEach(p => {
+      csvContent += `${p.name},${p.barcode},${p.scode},${p.exp},${p.category},${p.qty},${p.addedBy},${p.comment}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "products.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+</body>
+</html>
